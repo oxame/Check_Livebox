@@ -39,11 +39,10 @@ def Print_Help():
     print("Options:")
     print("-i, --ip\t\t\tAdresse IP de votre Synology")
     print("-c, --community\t\tCommunity SNMP de votre Synology")
-    print("-V, --volume\t\tVolume à vérifier")
     print("-W, --warning\t\tSeuil d'avertissement en pourcentage")
     print("-C, --critical\t\tSeuil critique en pourcentage")
-    print("-s, --check\t\tType de vérification à effectuer (volume, uptime, diskstatus, systemstatus)")
-    print("Exemple: check_Synology.py -i 192.168.1.10 -c public -V volume1 -W 80 -C 90 -s diskstatus")
+    print("-s, --check\t\tType de vérification à effectuer ()")
+    print("Exemple: check_livebox.py -i 192.168.1.10 -c public -W 80 -C 90 ")
 
 def ReturnNagios(Exit,Print):
     # Exit Code
