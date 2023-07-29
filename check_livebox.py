@@ -10,6 +10,14 @@ ExitWarning = 1
 ExitCritical = 2
 ExitUNKNOWN = 3
 
+#OID Description interface
+Desc = "IF-MIB::ifDescr"
+
+#OID Out Octet
+Out = 'IF-MIB::ifOutOctets'
+
+#OID MIB In Octet
+In = 'IF-MIB::ifInOctets'
 
 # Function to convert bytes to GB
 def octet_to_gb(bytes):
@@ -34,14 +42,39 @@ def snmp_get(ip, community, oid):
     except subprocess.CalledProcessError as e:
         return "Error occured: {}".format(e.output.decode())
 
+def TestFile(File):
+	return os.path.exist(File)
+
+def FileWrite(File,ip,community,Desc,Out,In):
+	if TestFile(File):
+		try:
+			with open(File, "a") as text_file:
+				for WAlk in snmp_get(ip, community, Desc):
+					print(WAlk)
+		except IOError:
+			ReturnNagios(2,"Error " + File)
+	else:
+		ReturnNagios(2,"Error " + File)
+
+def FileRead(File):
+	if TestFile(File):
+		with open(File, "a") as text_file:
+			print('hello')
+	else:
+		print("Hello")
+
+def Interface(ip,community,Desc,Out,In):
+	File = "/tmp/" + ip
+	FileWrite(File,ip,community,Desc,Out,In)
+
 def Print_Help():
-    print("Utilisation: check_Synology.py -i IP -c community -V volume -W warning -C critical -s check")
+    print("Utilisation: check_livebox.py -i IP -c community -W warning -C critical -s check")
     print("Options:")
-    print("-i, --ip\t\t\tAdresse IP de votre Synology")
-    print("-c, --community\t\tCommunity SNMP de votre Synology")
-    print("-W, --warning\t\tSeuil d'avertissement en pourcentage")
-    print("-C, --critical\t\tSeuil critique en pourcentage")
-    print("-s, --check\t\tType de vérification à effectuer ()")
+    print("-i, --ip		Adresse IP de votre Synology")
+    print("-c, --community	Community SNMP de votre Synology")
+    print("-W, --warning	Seuil d'avertissement en pourcentage")
+    print("-C, --critical	Seuil critique en pourcentage")
+    print("-s, --check	Type de vérification à effectuer ()")
     print("Exemple: check_livebox.py -i 192.168.1.10 -c public -W 80 -C 90 ")
 
 def ReturnNagios(Exit,Print):
@@ -103,10 +136,14 @@ def parse_args(argv):
 
 def main():
 
-    ip, community, version, volume, warning, critical, check = parse_args(sys.argv[1:])
+	ip, community, version, volume, warning, critical, check = parse_args(sys.argv[1:])
 
-    elif help:
-         Print_Help()
+	if check == 'Interface':
+		Interface(ip,community,Desc,Out,In)
+	elif help:
+		Print_Help()
+	else:
+		Print_Help()
 
 
 if __name__ == '__main__':
