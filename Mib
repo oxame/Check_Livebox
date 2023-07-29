@@ -1,0 +1,62 @@
+IF-MIB::ifDescr.111 = STRING: GigabitEthernet0/0
+IF-MIB::ifDescr.112 = STRING: GigabitEthernet0/1
+IF-MIB::ifDescr.113 = STRING: GigabitEthernet0/2
+IF-MIB::ifDescr.114 = STRING: GigabitEthernet0/3
+IF-MIB::ifDescr.116 = STRING: GigabitEthernet1/0
+IF-MIB::ifDescr.901 = STRING: dot11radio0/0
+IF-MIB::ifDescr.9501 = STRING: Bvi1
+IF-MIB::ifDescr.9901 = STRING: Null0
+IF-MIB::ifDescr.9902 = STRING: Loopback0
+IF-MIB::ifDescr.9903 = STRING: Loopback1
+IF-MIB::ifDescr.11101 = STRING: Dialer1
+IF-MIB::ifDescr.18178 = STRING: GigabitEthernet0/0.1010
+IF-MIB::ifDescr.22273 = STRING: GigabitEthernet1/0.200
+
+
+
+IF-MIB::ifOutOctets.111 = Counter32: 4112589706
+IF-MIB::ifOutOctets.112 = Counter32: 0
+IF-MIB::ifOutOctets.113 = Counter32: 0
+IF-MIB::ifOutOctets.114 = Counter32: 186758005
+IF-MIB::ifOutOctets.116 = Counter32: 3058758649
+IF-MIB::ifOutOctets.901 = Counter32: 0
+IF-MIB::ifOutOctets.9501 = Counter32: 129296728
+IF-MIB::ifOutOctets.9901 = Counter32: 0
+IF-MIB::ifOutOctets.9902 = Counter32: 519217234
+IF-MIB::ifOutOctets.9903 = Counter32: 0
+IF-MIB::ifOutOctets.11101 = Counter32: 2371119887
+IF-MIB::ifOutOctets.18178 = Counter32: 2696159168
+IF-MIB::ifOutOctets.22273 = Counter32: 4078047067
+
+
+
+
+
+IF-MIB::ifInOctets.111 = Counter32: 3378201052
+IF-MIB::ifInOctets.112 = Counter32: 0
+IF-MIB::ifInOctets.113 = Counter32: 0
+IF-MIB::ifInOctets.114 = Counter32: 203018820
+IF-MIB::ifInOctets.116 = Counter32: 1407825306
+IF-MIB::ifInOctets.901 = Counter32: 0
+IF-MIB::ifInOctets.9501 = Counter32: 951082627
+IF-MIB::ifInOctets.9901 = Counter32: 0
+IF-MIB::ifInOctets.9902 = Counter32: 519220903
+IF-MIB::ifInOctets.9903 = Counter32: 0
+IF-MIB::ifInOctets.11101 = Counter32: 3656827605
+IF-MIB::ifInOctets.18178 = Counter32: 2244115317
+IF-MIB::ifInOctets.22273 = Counter32: 760900732
+
+IF-MIB::ifSpeed.111 = Gauge32: 1000000000
+IF-MIB::ifSpeed.112 = Gauge32: 1000000000
+IF-MIB::ifSpeed.113 = Gauge32: 1000000000
+IF-MIB::ifSpeed.114 = Gauge32: 100000000
+IF-MIB::ifSpeed.116 = Gauge32: 8800000
+IF-MIB::ifSpeed.901 = Gauge32: 130000000
+IF-MIB::ifSpeed.9501 = Gauge32: 1000000000
+IF-MIB::ifSpeed.9901 = Gauge32: 0
+IF-MIB::ifSpeed.9902 = Gauge32: 0
+IF-MIB::ifSpeed.9903 = Gauge32: 0
+IF-MIB::ifSpeed.11101 = Gauge32: 1000000000
+IF-MIB::ifSpeed.18178 = Gauge32: 1000000000
+IF-MIB::ifSpeed.22273 = Gauge32: 8800000
+
