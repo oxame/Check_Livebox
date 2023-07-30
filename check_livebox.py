@@ -1,7 +1,7 @@
 #!/usr/bin/python3.6
 # -*- encoding: utf-8 -*-
 
-import getopt, sys,subprocess, re
+import getopt, sys,subprocess, re, os
 from datetime import timedelta
 
 # Exit Code
@@ -27,12 +27,13 @@ def GetValue(snmpret):
     return snmpret.split('=')[1].split(':')[-1].replace('"','').replace('\n','')
 
 def snmp_walk(ip, community, oid):
+    print("snmpwalk")        
     cmd = "snmpwalk -v 2c -c {} {} {}".format(community, ip, oid)
     try:
         output = subprocess.check_output(cmd, shell=True)
         return output.decode()
     except subprocess.CalledProcessError as e:
-        return "Error occured: {}".format(e.output.decode())
+        return ReturnNagios(3,"Error occured: {}".format("Output : {}".format(e.output)))
 
 def snmp_get(ip, community, oid):
     cmd = "snmpget -v2c -c {} {} {}".format(community, ip, oid)
@@ -40,32 +41,78 @@ def snmp_get(ip, community, oid):
         output = subprocess.check_output(cmd, shell=True)
         return output.decode()
     except subprocess.CalledProcessError as e:
-        return "Error occured: {}".format(e.output.decode())
+        return "Error occured: {}".format(e.output)
+
+def GetValue(snmpret):
+    return snmpret.split('=')[1].split(':')[-1].replace('"','').replace('\n','').replace(' ','')
+
+
+def GetIndex(snmpret):
+    return snmpret.split('=')[0].split('.')[1].replace(' ','')
+
+
+def CalculBdPass(NewValue, OldValue):
+    Out = ""
+    for Value in NewValue:
+        Data = "{}: In {} Ko, Out {} Ko".format(Value[1], (int(Value[2]) - int(OldValue[Value[0]][1])) /1000, (int(Value[2]) - int(OldValue[Value[0]][1])) /1000 )
+        if Out == "":
+            Out = "{}".format(Data)
+        else:
+            Out = "{},{}".format(Out,Data)
+
+    return Out
 
 def TestFile(File):
-	return os.path.exist(File)
+    return os.path.exists(File)
 
-def FileWrite(File,ip,community,Desc,Out,In):
-	if TestFile(File):
-		try:
-			with open(File, "a") as text_file:
-				for WAlk in snmp_get(ip, community, Desc):
-					print(WAlk)
-		except IOError:
-			ReturnNagios(2,"Error " + File)
-	else:
+
+def CollectValue(ip,community,Desc,Out,In, NewValue):
+    
+    for Walk in  snmp_walk(ip, community, Desc):
+            GetIndex(Walk)
+            NewValue[GetIndex(Walk)] = [GetIndex(Walk), GetValue(Walk), "", ""]
+    for Walk in  snmp_walk(ip, community, Out):
+        GetIndex(Walk)
+        NewValue[GetIndex(Walk)] = [NewValue[GetIndex(Walk)][0], NewValue[GetIndex(Walk)][1], GetValue(Walk), ""]
+    for Walk in  snmp_walk(ip, community, In):
+        GetIndex(Walk)
+        NewValue[GetIndex(Walk)] = [NewValue[GetIndex(Walk)][0], NewValue[GetIndex(Walk)][1], NewValue[GetIndex(Walk)][2], GetValue(Walk)]
+    return NewValue
+
+def FileWrite(File,NewValue):
+	try:
+		with open("/tmp/10.27.254.1", "w") as text_file:
+			for i in NewValue:
+				text_file.write("{};{};{};{}\n".format(i[0],i[1],i[2],i[3]))
+		text_file.close
+	except IOError:
 		ReturnNagios(2,"Error " + File)
 
-def FileRead(File):
-	if TestFile(File):
-		with open(File, "a") as text_file:
-			print('hello')
+def FileRead(File,OldValue):
+	
+	if TestFile(File):	
+		with open(File) as file:
+			for line in file:
+				OldValue[line.split(';')[0]] = [line.split(';')[1],line.split(';')[2],line.split(';')[3]]
 	else:
-		print("Hello")
+		ReturnNagios(3,"Fichier : {} erreur".format(File))
+	return OldValue
 
 def Interface(ip,community,Desc,Out,In):
-	File = "/tmp/" + ip
-	FileWrite(File,ip,community,Desc,Out,In)
+
+    File = "/tmp/{}".format(ip)
+    OldValue = {}
+    NewValue = {}
+    if TestFile(File) == False:
+        FileWrite(File,ip,community,Desc,Out,In)
+        ReturnNagios(3,"Fichier : {} erreur".format(File))
+    else:
+        OldValue = FileRead(File,OldValue)
+        NewValue = CollectValue(ip,community,Desc,Out,In, NewValue)
+        FileWrite(File,NewValue)        
+        ReturnNagios(1,CalculBdPass(NewValue, OldValue))
+
+    
 
 def Print_Help():
     print("Utilisation: check_livebox.py -i IP -c community -W warning -C critical -s check")
@@ -108,7 +155,7 @@ def parse_args(argv):
     try:
         opts, args = getopt.getopt(argv, "i:c:v:V:W:C:s:", ["ip=", "community=", "version=", "warning=","critical=", "check="])
     except getopt.GetoptError:
-        print("check_Synology.py -i <ip> -c <community> -v <version> -V <volume> -u <unit> -s <check>")
+        print("check_livebox.py -i <ip> -c <community> -v <version> -u <unit> -s <check>")
         sys.exit(2)
     for opt, arg in opts:
         if opt in ("-i", "--ip"):
@@ -126,17 +173,14 @@ def parse_args(argv):
         elif opt in ("-h", "--help"):
             help = True                       
     if not (ip and community and version):
-            print("check_Synology.py.py -i <ip> -c <community> -v <version> [-V <volume>] [-W <warning>] [-C <critical>] [-s <check>]")
-            sys.exit(2)
-    if check == 'volume' and volume is None:
-        print("check_Synology.py.py -i <ip> -c <community> -v <version> [-V <volume>] [-W <warning>] [-C <critical>] [-s <check>]")
-        sys.exit(2)       
-    return ip, community, version, volume, warning, critical, check
+            print("check_livebox.py -i <ip> -c <community> -v <version> [-W <warning>] [-C <critical>] [-s <check>]")
+            sys.exit(2)     
+    return ip, community, version, warning, critical, check
 
 
 def main():
 
-	ip, community, version, volume, warning, critical, check = parse_args(sys.argv[1:])
+	ip, community, version, warning, critical, check = parse_args(sys.argv[1:])
 
 	if check == 'Interface':
 		Interface(ip,community,Desc,Out,In)
