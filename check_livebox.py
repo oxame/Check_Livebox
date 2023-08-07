@@ -84,6 +84,26 @@ def CollectValue(ip,community,Desc,Out,In, NewValue):
             NewValue[GetIndex(Walk)] = [NewValue[GetIndex(Walk)][0], NewValue[GetIndex(Walk)][1], NewValue[GetIndex(Walk)][2], GetValue(Walk)]
     return NewValue
 
+def CollectValueName(Name,ip,community,Desc,Out,In, NewValue):
+    Index = None
+    for Walk in  snmp_walk(ip, community, Desc).split('\n'):
+        if Walk:
+            GetIndex(Walk)
+            print(GetValue(Walk))
+            if GetValue(Walk) == Name:
+                Index = GetIndex(Walk)
+                NewValue[GetIndex(Walk)] = [GetIndex(Walk), GetValue(Walk), "", ""]
+                break
+    if Index == None:
+        ReturnNagios(2,"Error interface Name : {} non trouvez".format(Name))
+    for Walk in  snmp_walk(ip, community, Out + "." + Index).split('\n'):
+        if Walk:
+            NewValue[Index] = [NewValue[GetIndex(Walk)][0], NewValue[GetIndex(Walk)][1], GetValue(Walk), ""]
+    for Walk in  snmp_walk(ip, community, In + "." + Index).split('\n'):
+        if Walk:
+            NewValue[Index] = [NewValue[GetIndex(Walk)][0], NewValue[GetIndex(Walk)][1], NewValue[GetIndex(Walk)][2], GetValue(Walk)]
+    return NewValue
+	
 def FileWrite(File,NewValue):
 	try:
 		with open(File, "w") as text_file:
@@ -103,6 +123,20 @@ def FileRead(File,OldValue):
 	else:
 		ReturnNagios(3,"Fichier : {} erreur".format(File))
 	return OldValue
+
+def InterfaceName(Name,ip,community,Desc,Out,In):
+    File = "/tmp/{}-{}".format(ip,Name.replace('/','-'))
+    OldValue = {}
+    NewValue = {}
+    if TestFile(File) == False:
+        NewValue = CollectValueName(Name,ip,community,Desc,Out,In, NewValue)
+        FileWrite(File,NewValue)
+        ReturnNagios(3,"Fichier : {} erreur".format(File))
+    else:
+        OldValue = FileRead(File,OldValue)
+        NewValue = CollectValueName(Name,ip,community,Desc,Out,In, NewValue)
+        FileWrite(File,NewValue)        
+        ReturnNagios(1,CalculBdPass(NewValue, OldValue))
 
 def Interface(ip,community,Desc,Out,In):
 
@@ -163,8 +197,9 @@ def parse_args(argv):
     critical = 90
     check = None
     help = False
+    Name = None
     try:
-        opts, args = getopt.getopt(argv, "i:c:v:V:W:C:s:", ["ip=", "community=", "version=", "warning=","critical=", "check="])
+        opts, args = getopt.getopt(argv, "i:c:v:V:W:C:s:n:", ["ip=", "community=", "version=", "warning=","critical=", "check=", "Name="])
     except getopt.GetoptError:
         print("check_livebox.py -i <ip> -c <community> -v <version> -u <unit> -s <check>")
         sys.exit(2)
@@ -180,21 +215,27 @@ def parse_args(argv):
         elif opt in ("-C", "--critical"):
             critical = arg 
         elif opt in ("-s", "--check"):
-            check = arg    
+            check = arg  
+        elif opt in ("-n", "--name"):
+            Name = arg 
         elif opt in ("-h", "--help"):
             help = True                       
     if not (ip and community and version):
-            print("check_livebox.py -i <ip> -c <community> -v <version> [-W <warning>] [-C <critical>] [-s <check>]")
+            print("check_livebox.py -i <ip> -c <community> -v <version> [-W <warning>] [-C <critical>] [-s <check>] [-n <Name>]")
             sys.exit(2)     
-    return ip, community, version, warning, critical, check
+    return ip, community, version, warning, critical, check, Name
 
 
 def main():
 
-	ip, community, version, warning, critical, check = parse_args(sys.argv[1:])
+	ip, community, version, warning, critical, check, Name = parse_args(sys.argv[1:])
 
-	if check == 'Interface':
+	if check == "Interface":
+		Print("Interface")
 		Interface(ip,community,Desc,Out,In)
+	if check == "InterfaceName":
+		print("InterfaceName : {}".format(Name))
+		InterfaceName(Name,ip,community,Desc,Out,In)
 	if check == 'Nominal':
 		Nominal(ip,community,SysName)
 	elif help:
