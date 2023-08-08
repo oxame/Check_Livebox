@@ -49,14 +49,13 @@ def GetValue(snmpret):
 
 
 def GetIndex(snmpret):
-    print(snmpret)
     return snmpret.split('=')[0].split('.')[1].replace(' ','')
 
 
 def CalculBdPass(NewValue, OldValue):
     Out = ""
     for Value in NewValue.keys():
-        Data = "{}: In {} Ko, Out {} Ko".format(NewValue[Value][1], (int(NewValue[Value][2]) - int(OldValue[Value][2])) /1000, (int(NewValue[Value][2]) - int(OldValue[Value][2])) /1000 )
+        Data = "{}: In {} Ko, Out - {} Ko".format(NewValue[Value][1], (int(NewValue[Value][2]) - int(OldValue[Value][1])) /1000, (int(NewValue[Value][3]) - int(OldValue[Value][2])) /1000 )
         if Out == "":
             Out = "{}".format(Data)
         else:
@@ -72,15 +71,12 @@ def CollectValue(ip,community,Desc,Out,In, NewValue):
     
     for Walk in  snmp_walk(ip, community, Desc).split('\n'):
         if Walk:
-            GetIndex(Walk)
             NewValue[GetIndex(Walk)] = [GetIndex(Walk), GetValue(Walk), "", ""]
     for Walk in  snmp_walk(ip, community, Out).split('\n'):
         if Walk:
-            GetIndex(Walk)
             NewValue[GetIndex(Walk)] = [NewValue[GetIndex(Walk)][0], NewValue[GetIndex(Walk)][1], GetValue(Walk), ""]
     for Walk in  snmp_walk(ip, community, In).split('\n'):
         if Walk:
-            GetIndex(Walk)
             NewValue[GetIndex(Walk)] = [NewValue[GetIndex(Walk)][0], NewValue[GetIndex(Walk)][1], NewValue[GetIndex(Walk)][2], GetValue(Walk)]
     return NewValue
 
@@ -88,8 +84,6 @@ def CollectValueName(Name,ip,community,Desc,Out,In, NewValue):
     Index = None
     for Walk in  snmp_walk(ip, community, Desc).split('\n'):
         if Walk:
-            GetIndex(Walk)
-            print(GetValue(Walk))
             if GetValue(Walk) == Name:
                 Index = GetIndex(Walk)
                 NewValue[GetIndex(Walk)] = [GetIndex(Walk), GetValue(Walk), "", ""]
@@ -231,10 +225,8 @@ def main():
 	ip, community, version, warning, critical, check, Name = parse_args(sys.argv[1:])
 
 	if check == "Interface":
-		Print("Interface")
 		Interface(ip,community,Desc,Out,In)
 	if check == "InterfaceName":
-		print("InterfaceName : {}".format(Name))
 		InterfaceName(Name,ip,community,Desc,Out,In)
 	if check == 'Nominal':
 		Nominal(ip,community,SysName)
