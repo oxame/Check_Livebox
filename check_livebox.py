@@ -55,7 +55,7 @@ def GetIndex(snmpret):
 def CalculBdPass(NewValue, OldValue):
     Out = ""
     for Value in NewValue.keys():
-        Data = "{}: In {} Ko, Out - {} Ko".format(NewValue[Value][1], (int(NewValue[Value][2]) - int(OldValue[Value][1])) /1000, (int(NewValue[Value][3]) - int(OldValue[Value][2])) /1000 )
+        Data = "{}: In {} Ko, Out -{} Ko".format(NewValue[Value][1], (int(NewValue[Value][2]) - int(OldValue[Value][1])) /1000, (int(NewValue[Value][3]) - int(OldValue[Value][2])) /1000 )
         if Out == "":
             Out = "{}".format(Data)
         else:
@@ -130,7 +130,7 @@ def InterfaceName(Name,ip,community,Desc,Out,In):
         OldValue = FileRead(File,OldValue)
         NewValue = CollectValueName(Name,ip,community,Desc,Out,In, NewValue)
         FileWrite(File,NewValue)        
-        ReturnNagios(1,CalculBdPass(NewValue, OldValue))
+        ReturnNagios(0,CalculBdPass(NewValue, OldValue))
 
 def Interface(ip,community,Desc,Out,In):
 
