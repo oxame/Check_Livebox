@@ -55,7 +55,9 @@ def GetIndex(snmpret):
 def CalculBdPass(NewValue, OldValue):
     Out = ""
     for Value in NewValue.keys():
-        Data = "{}: In {} Ko, Out -{} Ko".format(NewValue[Value][1], (int(NewValue[Value][2]) - int(OldValue[Value][1])) /1000, (int(NewValue[Value][3]) - int(OldValue[Value][2])) /1000 )
+        In = (int(NewValue[Value][2]) - int(OldValue[Value][1])) /1000
+        Ou = (int(NewValue[Value][3]) - int(OldValue[Value][2])) /1000 
+        Data = "{} - In = {} Ko, Ou = -{} Ko| In={}, Out=-{}".format(NewValue[Value][1],In,Ou,In,Ou)
         if Out == "":
             Out = "{}".format(Data)
         else:
@@ -171,16 +173,16 @@ def ReturnNagios(Exit,Print):
     ExitUNKNOWN = 3
 
     if Exit == 0:
-        print("OK : {0}".format(Print))
+        print("OK - {0}".format(Print))
         sys.exit(ExitOK)
     elif Exit == 1:
-        print("WARNING : {0}".format(Print))
+        print("WARNING - {0}".format(Print))
         sys.exit(ExitWarning)
     elif Exit == 2:
-        print("CRITICAL : {0}".format(Print))
+        print("CRITICAL - {0}".format(Print))
         sys.exit(ExitCritical)
     elif Exit == 3:
-        print("UNKNOWN : {0}".format(Print))
+        print("UNKNOWN - {0}".format(Print))
         sys.exit(ExitUNKNOWN)
 
 def parse_args(argv):
