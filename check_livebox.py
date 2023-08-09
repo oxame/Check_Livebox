@@ -57,7 +57,7 @@ def CalculBdPass(NewValue, OldValue):
     for Value in NewValue.keys():
         In = (int(NewValue[Value][2]) - int(OldValue[Value][1])) /1000
         Ou = (int(NewValue[Value][3]) - int(OldValue[Value][2])) /1000 
-        Data = "{} - In = {} Ko, Ou = -{} Ko| In={}, Out=-{}".format(NewValue[Value][1],In,Ou,In,Ou)
+        Data = "{} - In = {} Ko, Ou = -{} Ko|\nIn={}Ko\nOut=-{}Ko".format(NewValue[Value][1],In,Ou,In,Ou)
         if Out == "":
             Out = "{}".format(Data)
         else:
